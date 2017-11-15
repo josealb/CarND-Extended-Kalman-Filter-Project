@@ -92,7 +92,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
         float rho_dot = measurement_pack.raw_measurements_[2];
         
         ekf_.x_ << rho * cos(phi), rho * sin(phi), rho_dot * cos(phi), rho_dot * sin(phi);
-        
+        //ekf_.x_ << rho * cos(phi), rho * sin(phi), 0, 0;
+
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -103,8 +104,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     }
 
     // done initializing, no need to predict or update
+      
+    previous_timestamp_ = measurement_pack.timestamp_;
+
     is_initialized_ = true;
     return;
+      
   }
 
   /*****************************************************************************
@@ -156,7 +161,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // Radar updates
       ekf_.H_ = tools.CalculateJacobian(ekf_.x_);
       ekf_.R_ = R_radar_;
-      //ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+      ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 
   } else {
     // Laser updates
