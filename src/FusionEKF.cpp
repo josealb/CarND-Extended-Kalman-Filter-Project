@@ -37,8 +37,8 @@ FusionEKF::FusionEKF() {
     * Finish initializing the FusionEKF.
     * Set the process and measurement noises
   */
-  R_laser_ << 1, 0,
-              0, 1;
+  //R_laser_ << 1, 0,
+  //            0, 1;
     
   H_laser_ << 1,0,0,0,
               0,1,0,0;
@@ -51,10 +51,16 @@ FusionEKF::FusionEKF() {
               0, 0, 0, 1000;
   //the initial transition matrix F_
   ekf_.F_ = MatrixXd(4, 4);
-  ekf_.F_ << 1, 0, 1, 0,
-  0, 1, 0, 1,
-  0, 0, 1, 0,
-  0, 0, 0, 1;
+ // ekf_.F_ << 1, 0, 1, 0,
+ // 0, 1, 0, 1,
+  //0, 0, 1, 0,
+  //0, 0, 0, 1;
+    
+    ekf_.F_ << 1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1;
+    
     
   ekf_.Q_ = MatrixXd(4, 4);
 
@@ -158,14 +164,22 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
+      cout << "Radar Measurement: " << measurement_pack.raw_measurements_ << endl;
       ekf_.H_ = tools.CalculateJacobian(ekf_.x_);
+      cout << "Radar H Matrix: " << ekf_.H_ << endl;
       ekf_.R_ = R_radar_;
+      cout << "Radar R Matrix: " << ekf_.R_ << endl;
+
       ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 
   } else {
     // Laser updates
+      cout << "Laser Measurement: " << measurement_pack.raw_measurements_ << endl;
       ekf_.H_ = H_laser_;
+      cout << "Laser H Matrix: " << ekf_.H_ << endl;
       ekf_.R_ = R_laser_;
+      cout << "Laser R Matrix: " << ekf_.R_ << endl;
+
       ekf_.Update(measurement_pack.raw_measurements_);
   }
 
